@@ -1,3 +1,4 @@
+def VERSION = "1.0.0"
 pipeline {
     agent any
   tools {
@@ -7,6 +8,10 @@ pipeline {
 	    stage('Build') {
 		  steps{
 		      sh 'mvn clean package'
+			  script {
+                    VERSION = readMavenPom().getVersion()
+                }
+                echo("Build version: ${VERSION}") 
       }
       }
 	    stage('sonarqube analysis') {
@@ -26,7 +31,7 @@ pipeline {
 	  }
 	  stage('upload war to nexus'){
           steps{
-	  nexusArtifactUploader artifacts: [[artifactId: 'WebApp', classifier: '', file: 'target/WebApp.war', type: 'war']], credentialsId: 'nexus3', groupId: 'Demoapp', nexusUrl: '20.212.18.14:8081', nexusVersion: 'nexus3', protocol: 'http', repository: 'projectoss-release', version: '1.1.1'
+	  nexusArtifactUploader artifacts: [[artifactId: 'WebApp', classifier: '', file: 'target/WebApp.war', type: 'war']], credentialsId: 'nexus3', groupId: 'Demoapp', nexusUrl: '20.212.18.14:8081', nexusVersion: 'nexus3', protocol: 'http', repository: 'projectoss-release', version: "${VERSION}"
 	  }
 	  }
 	  stage('deploy to tomcat'){
@@ -41,8 +46,3 @@ pipeline {
 	  }
 	     
 	
-
-	  
-	  
-	  
-	  
